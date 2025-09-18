@@ -212,6 +212,50 @@
                 max-width: 90%;
             }
         }
+
+        .caixa {
+            width: 150px;
+            height: 150px;
+            background: white;
+            opacity: 0; /* começa invisível */
+            transform: translateY(50px) rotate(10deg); /* começa mais embaixo e girada */
+            animation: fadeInUp 1s ease forwards; /* aplica animação */                
+        }
+
+        @keyframes fadeInUp {
+            to {
+            opacity: 1; /* fica visível */
+            transform: translateY(0) rotate(10deg); /* sobe e mantém rotação */
+            }
+        }
+
+        .polaroid {
+      width: 200px;
+      height: 240px;
+      background: white;
+      padding: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      transform: rotate(5deg); /* inclinado */
+    }
+
+    .polaroid img {
+      width: 100%;
+      height: auto;
+      max-height: 180px;
+      object-fit: cover;
+      border: 2px solid #ccc;
+    }
+
+    .caption {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #333;
+      font-family: Arial, sans-serif;
+    }
     </style>
 </head>
 <body>
@@ -220,6 +264,10 @@
         <div class="slide active" data-bg-type="image" data-bg="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" data-music="./music/Coldplay - Clocks.mp3">
             <div class="slide-overlay"></div>
             <div class="slide-content">
+                <div class="polaroid">
+                    <img src="img/meme2.jpg" alt="Minha foto">
+                    <div class="caption">Minha Foto</div>
+                </div>
                 <h1 class="slide-title">Bem-vindos</h1>
                 <h2 class="slide-subtitle">ao Nosso Mundo Musical</h2>
                 <p class="slide-description">Uma experiência imersiva onde música e visual se encontram</p>
@@ -230,6 +278,11 @@
         <div class="slide" data-bg-type="image" data-bg="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" data-music="./music/Coldplay - Clocks.mp3">
             <div class="slide-overlay"></div>
             <div class="slide-content">
+                <div class="polaroid">
+                    <img src="img/meme2.jpg" alt="Minha foto">
+                    <div class="caption">Minha Foto</div>
+                </div>
+                <div class="caixa"></div>
                 <h1 class="slide-title">Ritmo & Melodia</h1>
                 <h2 class="slide-subtitle">Sinta cada batida</h2>
                 <p class="slide-description">Deixe a música guiar sua alma através desta jornada visual</p>
