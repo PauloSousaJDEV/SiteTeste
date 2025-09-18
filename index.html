@@ -692,16 +692,21 @@
 
         // Inicializa o carrossel quando a página carrega
         document.addEventListener('DOMContentLoaded', () => {
+            let carouselInitialized = false; // Variável para verificar se o carrossel já foi inicializado
+
             // Aguarda interação do usuário para iniciar áudio (requerido pelos navegadores)
             document.addEventListener('click', function initAudio() {
-                new VerticalCarousel();
-                document.removeEventListener('click', initAudio);
-            }, { once: true });
+                if (!carouselInitialized) {
+                    new VerticalCarousel();
+                    carouselInitialized = true; // Marca como inicializado
+                }
+            });
 
             // Fallback: inicia sem áudio se não houver clique
             setTimeout(() => {
-                if (!window.carousel) {
+                if (!carouselInitialized) {
                     new VerticalCarousel();
+                    carouselInitialized = true; // Marca como inicializado
                 }
             }, 1000);
         });
