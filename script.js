@@ -1,4 +1,51 @@
+// Seleciona os elementos do carrossel
+const slides = document.querySelectorAll('.slide');
+const indicators = document.querySelectorAll('.indicator');
+const audioPlayer = new Audio();
+let currentSlideIndex = 0;
 
+// Função para tocar música
+function playMusic(src) {
+    if (audioPlayer.src !== src) {
+        audioPlayer.src = src;
+        audioPlayer.play();
+    }
+}
+
+// Função para mudar slide
+function changeSlide(newIndex) {
+    if (newIndex === currentSlideIndex) return;
+
+    const currentSlide = slides[currentSlideIndex];
+    const nextSlide = slides[newIndex];
+
+    // Verifica se a música do próximo slide é diferente
+    const currentMusic = currentSlide.dataset.music;
+    const nextMusic = nextSlide.dataset.music;
+
+    if (currentMusic !== nextMusic) {
+        playMusic(nextMusic);
+    }
+
+    // Atualiza os slides ativos
+    currentSlide.classList.remove('active');
+    nextSlide.classList.add('active');
+
+    // Atualiza os indicadores
+    indicators[currentSlideIndex].classList.remove('active');
+    indicators[newIndex].classList.add('active');
+
+    // Atualiza o índice atual
+    currentSlideIndex = newIndex;
+}
+
+// Adiciona eventos aos indicadores
+indicators.forEach((indicator, index) => {
+    indicator.addEventListener('click', () => changeSlide(index));
+});
+
+// Inicia a música do primeiro slide
+playMusic(slides[currentSlideIndex].dataset.music);
 
         class VerticalCarousel {
             constructor() {
@@ -15,6 +62,8 @@
                 
                 this.init();
             }
+
+            
 
             async init() {
                 await this.initAudio();
@@ -236,6 +285,12 @@
                 const fromAudio = this.audioSources.get(fromSlide);
                 const toAudio = this.audioSources.get(toSlide);
 
+                // Verifica se o áudio do slide atual é o mesmo do próximo slide
+                if (fromAudio && toAudio && fromAudio.audioBuffer === toAudio.audioBuffer) {
+                    // Se for o mesmo, não faz transição de áudio
+                    return;
+                }
+
                 // Fade out do áudio anterior
                 if (fromAudio && this.isPlaying) {
                     if (fromAudio.isDemoAudio) {
@@ -264,26 +319,38 @@
             }
 
             playAudioBuffer(slideIndex) {
-                const audioData = this.audioSources.get(slideIndex);
-                if (!audioData || !audioData.audioBuffer || audioData.isPlaying) return;
+    const audioData = this.audioSources.get(slideIndex);
+    if (!audioData || !audioData.audioBuffer) return;
 
-                const source = this.audioContext.createBufferSource();
-                source.buffer = audioData.audioBuffer;
-                source.connect(audioData.gainNode);
-                source.loop = true;
-                
-                audioData.gainNode.gain.setValueAtTime(0.001, this.audioContext.currentTime);
-                audioData.gainNode.gain.exponentialRampToValueAtTime(0.3, this.audioContext.currentTime + 0.5);
-                
-                source.start();
-                audioData.source = source;
-                audioData.isPlaying = true;
-                
-                source.onended = () => {
-                    audioData.source = null;
-                    audioData.isPlaying = false;
-                };
-            }
+    // Para qualquer áudio que já esteja tocando
+    this.audioSources.forEach((data, index) => {
+        if (data.source && index !== slideIndex) {
+            data.source.stop();
+            data.source = null;
+            data.isPlaying = false;
+        }
+    });
+
+    // Verifica se o áudio já está tocando para evitar duplicação
+    if (audioData.isPlaying) return;
+
+    const source = this.audioContext.createBufferSource();
+    source.buffer = audioData.audioBuffer;
+    source.connect(audioData.gainNode);
+    source.loop = true;
+
+    audioData.gainNode.gain.setValueAtTime(0.001, this.audioContext.currentTime);
+    audioData.gainNode.gain.exponentialRampToValueAtTime(0.3, this.audioContext.currentTime + 0.5);
+
+    source.start();
+    audioData.source = source;
+    audioData.isPlaying = true;
+
+    source.onended = () => {
+        audioData.source = null;
+        audioData.isPlaying = false;
+    };
+}
 
             startSlide(index) {
                 if (!this.audioContext) return;
