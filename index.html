@@ -1,11 +1,356 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Carrossel Vertical</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    
+    <div class="carousel-container">
+        <!-- Slide 1 -->
+        <div class="slide active" data-bg-type="image" data-bg="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" data-music="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav">
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1 class="slide-title">Bem-vindos</h1>
+                <h2 class="slide-subtitle">ao Nosso Mundo Musical</h2>
+                <p class="slide-description">Uma experiência imersiva onde música e visual se encontram</p>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide next" data-bg-type="image" data-bg="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" data-music="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav">
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1 class="slide-title">Ritmo & Melodia</h1>
+                <h2 class="slide-subtitle">Sinta cada batida</h2>
+                <p class="slide-description">Deixe a música guiar sua alma através desta jornada visual</p>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide next" data-bg-type="image" data-bg="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" data-music="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav">
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1 class="slide-title">Inovação</h1>
+                <h2 class="slide-subtitle">Tecnologia & Arte</h2>
+                <p class="slide-description">O futuro da experiência digital está aqui</p>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide next" data-bg-type="video" data-bg="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" data-music="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav">
+            <video class="video-background" autoplay muted loop>
+                <source src="https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4" type="video/mp4">
+            </video>
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1 class="slide-title">Movimento</h1>
+                <h2 class="slide-subtitle">Vida em cada frame</h2>
+                <p class="slide-description">Vídeos que contam histórias além das palavras</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores -->
+    <div class="slide-indicators">
+        <div class="indicator active" data-slide="0"></div>
+        <div class="indicator" data-slide="1"></div>
+        <div class="indicator" data-slide="2"></div>
+        <div class="indicator" data-slide="3"></div>
+    </div>
+
+    <!-- Barra de Progresso -->
+    <div class="progress-bar">
+        <div class="progress-fill" style="width: 25%"></div>
+    </div>
+
+    <!-- Controles -->
+    <div class="controls">
+        <button class="control-btn" id="muteBtn">🔊</button>
+        <button class="control-btn" id="playBtn">⏸️</button>
+    </div>
+
+    <script>
+        class VerticalCarousel {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.indicators = document.querySelectorAll('.indicator');
+                this.progressFill = document.querySelector('.progress-fill');
+                this.currentSlide = 0;
+                this.isTransitioning = false;
+                this.audioContext = null;
+                this.currentAudio = null;
+                this.audioSources = new Map();
+                this.isPlaying = true;
+                this.isMuted = false;
+                
+                this.init();
+            }
+
+            async init() {
+                await this.initAudio();
+                this.setupEventListeners();
+                this.loadSlideBackgrounds();
+                this.startSlide(0);
+            }
+
+            async initAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Para demonstração, vou usar um tom gerado para cada slide
+                    // Na implementação real, você substituiria pelos URLs das suas músicas
+                    this.createDemoAudioForSlides();
+                } catch (error) {
+                    console.log('Áudio não suportado:', error);
+                }
+            }
+
+            createDemoAudioForSlides() {
+                // Cria tons diferentes para cada slide como demonstração
+                const frequencies = [440, 523.25, 659.25, 783.99]; // A4, C5, E5, G5
+                
+                frequencies.forEach((freq, index) => {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                    oscillator.type = 'sine';
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    
+                    this.audioSources.set(index, { oscillator, gainNode });
+                });
+            }
+
+            setupEventListeners() {
+                // Mouse wheel
+                document.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (this.isTransitioning) return;
+
+                    if (e.deltaY > 0) {
+                        this.nextSlide();
+                    } else {
+                        this.prevSlide();
+                    }
+                });
+
+                // Indicadores
+                this.indicators.forEach((indicator, index) => {
+                    indicator.addEventListener('click', () => {
+                        if (!this.isTransitioning && index !== this.currentSlide) {
+                            this.goToSlide(index);
+                        }
+                    });
+                });
+
+                // Controles
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    this.togglePlayPause();
+                });
+
+                document.getElementById('muteBtn').addEventListener('click', () => {
+                    this.toggleMute();
+                });
+
+                // Teclado
+                document.addEventListener('keydown', (e) => {
+                    if (this.isTransitioning) return;
+                    
+                    switch(e.key) {
+                        case 'ArrowDown':
+                        case ' ':
+                            e.preventDefault();
+                            this.nextSlide();
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            this.prevSlide();
+                            break;
+                    }
+                });
+
+                // Toque para mobile
+                let startY = 0;
+                document.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                });
+
+                document.addEventListener('touchend', (e) => {
+                    if (this.isTransitioning) return;
+                    
+                    const endY = e.changedTouches[0].clientY;
+                    const diff = startY - endY;
+
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) {
+                            this.nextSlide();
+                        } else {
+                            this.prevSlide();
+                        }
+                    }
+                });
+            }
+
+            loadSlideBackgrounds() {
+                this.slides.forEach((slide, index) => {
+                    const bgType = slide.dataset.bgType;
+                    const bgSrc = slide.dataset.bg;
+
+                    if (bgType === 'image') {
+                        slide.style.backgroundImage = `url(${bgSrc})`;
+                    } else if (bgType === 'video') {
+                        const video = slide.querySelector('.video-background');
+                        if (video) {
+                            video.src = bgSrc;
+                        }
+                    }
+                });
+            }
+
+            nextSlide() {
+                const next = (this.currentSlide + 1) % this.slides.length;
+                this.goToSlide(next);
+            }
+
+            prevSlide() {
+                const prev = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+                this.goToSlide(prev);
+            }
+
+            goToSlide(index) {
+                if (this.isTransitioning || index === this.currentSlide) return;
+
+                this.isTransitioning = true;
+                const previousSlide = this.currentSlide;
+                this.currentSlide = index;
+
+                // Atualiza classes dos slides
+                this.slides.forEach((slide, i) => {
+                    slide.classList.remove('active', 'prev', 'next');
+                    
+                    if (i === this.currentSlide) {
+                        slide.classList.add('active');
+                    } else if (i < this.currentSlide) {
+                        slide.classList.add('prev');
+                    } else {
+                        slide.classList.add('next');
+                    }
+                });
+
+                // Atualiza indicadores
+                this.indicators.forEach((indicator, i) => {
+                    indicator.classList.toggle('active', i === this.currentSlide);
+                });
+
+                // Atualiza barra de progresso
+                const progress = ((this.currentSlide + 1) / this.slides.length) * 100;
+                this.progressFill.style.width = `${progress}%`;
+
+                // Transição de áudio
+                this.transitionAudio(previousSlide, this.currentSlide);
+
+                // Libera transição após animação
+                setTimeout(() => {
+                    this.isTransitioning = false;
+                }, 800);
+            }
+
+            transitionAudio(fromSlide, toSlide) {
+                if (!this.audioContext || this.isMuted) return;
+
+                const fromAudio = this.audioSources.get(fromSlide);
+                const toAudio = this.audioSources.get(toSlide);
+
+                if (fromAudio && this.isPlaying) {
+                    // Fade out do áudio anterior
+                    fromAudio.gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.5);
+                }
+
+                if (toAudio && this.isPlaying) {
+                    // Fade in do novo áudio
+                    toAudio.gainNode.gain.setValueAtTime(0.001, this.audioContext.currentTime);
+                    toAudio.gainNode.gain.exponentialRampToValueAtTime(0.3, this.audioContext.currentTime + 0.5);
+                }
+            }
+
+            startSlide(index) {
+                if (!this.audioContext) return;
+
+                try {
+                    // Inicia os osciladores (só pode ser feito uma vez)
+                    this.audioSources.forEach((audio, i) => {
+                        audio.oscillator.start();
+                        if (i === index && this.isPlaying && !this.isMuted) {
+                            audio.gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                        }
+                    });
+                } catch (error) {
+                    console.log('Erro ao iniciar áudio:', error);
+                }
+            }
+
+            togglePlayPause() {
+                this.isPlaying = !this.isPlaying;
+                const btn = document.getElementById('playBtn');
+                
+                if (this.isPlaying) {
+                    btn.textContent = '⏸️';
+                    if (!this.isMuted) {
+                        const currentAudio = this.audioSources.get(this.currentSlide);
+                        if (currentAudio) {
+                            currentAudio.gainNode.gain.exponentialRampToValueAtTime(0.3, this.audioContext.currentTime + 0.1);
+                        }
+                    }
+                } else {
+                    btn.textContent = '▶️';
+                    const currentAudio = this.audioSources.get(this.currentSlide);
+                    if (currentAudio) {
+                        currentAudio.gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
+                    }
+                }
+            }
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                const btn = document.getElementById('muteBtn');
+                
+                if (this.isMuted) {
+                    btn.textContent = '🔇';
+                    this.audioSources.forEach(audio => {
+                        audio.gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.1);
+                    });
+                } else {
+                    btn.textContent = '🔊';
+                    if (this.isPlaying) {
+                        const currentAudio = this.audioSources.get(this.currentSlide);
+                        if (currentAudio) {
+                            currentAudio.gainNode.gain.exponentialRampToValueAtTime(0.3, this.audioContext.currentTime + 0.1);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Inicializa o carrossel quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            // Aguarda interação do usuário para iniciar áudio (requerido pelos navegadores)
+            document.addEventListener('click', function initAudio() {
+                new VerticalCarousel();
+                document.removeEventListener('click', initAudio);
+            }, { once: true });
+
+            // Fallback: inicia sem áudio se não houver clique
+            setTimeout(() => {
+                if (!window.carousel) {
+                    new VerticalCarousel();
+                }
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
